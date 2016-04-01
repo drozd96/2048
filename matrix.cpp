@@ -11,6 +11,8 @@ class Matrix {
 			~Matrix();
 
 			Matrix & operator = (const Matrix & m);
+			friend ostream & operator << (ostream & s, const Matrix & m);
+			friend istream & operator >> (istream & s, const Matrix & m);
 };
 
 Matrix :: Matrix(int size){
@@ -68,7 +70,23 @@ Matrix :: ~Matrix(){
 	}
 };
 
-int main(){
+ostream & operator << (ostream & s, const Matrix & m){
+	for(int i = 0; i < m.size; i++){
+		for(int j = 0; j < m.size; j++)
+			s << m.matr[i][j] << " ";
+		s << endl;	
+	} 
+return s;
+};
 
+istream & operator >> (istream & s, const Matrix & m){
+	for(int i = 0; i < m.size; i++)
+		for(int j = 0; j < m.size; j++)
+			s >> m.matr[i][j];
+return s;
+};
+
+int main(){
+	Matrix m(2);
 return 0;
 }
