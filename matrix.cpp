@@ -11,6 +11,10 @@ class Matrix {
 			~Matrix();
 
 			Matrix & operator = (const Matrix & m);
+			Matrix & operator + (const Matrix & m);
+			Matrix & operator - (const Matrix & m);
+			int sum_proizv(const Matrix & m, int k, int l) const;
+			Matrix & operator * (const Matrix & m);
 			friend ostream & operator << (ostream & s, const Matrix & m);
 			friend istream & operator >> (istream & s, const Matrix & m);
 };
@@ -62,6 +66,42 @@ Matrix & Matrix :: operator = (const Matrix & m){
 return *this;
 };
 
+Matrix & Matrix :: operator + (const Matrix & m){
+	if(m.size == 0 || m.size != size) return *this;
+	for(int i = 0; i < size; i++)
+		for(int j = 0; j < size; j++)
+			matr[i][j] += m.matr[i][j]; 
+return *this;
+};
+
+Matrix & Matrix :: operator - (const Matrix & m){
+	if(m.size == 0 || m.size != size) return *this;
+	for(int i = 0; i < size; i++)
+		for(int j = 0; j < size; j++)
+			matr[i][j] -= m.matr[i][j]; 
+return *this;
+};
+
+int Matrix :: sum_proizv(const Matrix & m, int k, int l) const {
+	int sum = 0;
+	for(int i = 0; i< size; i++){
+		cout << "matr[ " << k << " ][ " << i << "] = " << matr[k][i] << endl;
+		cout << "matr[ " << i << " ][ " << l << "] = " << matr[i][l] << endl;
+		sum += matr[k][i] * m.matr[i][l];
+	}
+	cout << endl;
+return sum;
+};
+
+Matrix & Matrix :: operator * (const Matrix & m){
+	if(m.size == 0 || m.size != size) return * this;
+	Matrix tmp(*this); 
+	for(int i = 0; i < size; i++)
+		for(int j = 0; j < size; j++)
+			matr[i][j] = tmp.sum_proizv(m,i,j);
+return * this;
+};
+
 Matrix :: ~Matrix(){
 	if(size != 0){
 		for(int i = 0; i < size; i++)
@@ -87,6 +127,10 @@ return s;
 };
 
 int main(){
-	Matrix m(2);
+	Matrix m(2), a(2);
+	cin >> m;
+	cin >> a;
+	m * a;
+	cout << m;
 return 0;
 }
