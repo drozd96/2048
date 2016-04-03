@@ -111,7 +111,7 @@ Matrix :: ~Matrix(){
 	}
 };
 
-int ** Matrix :: get_pointer(){
+int ** Matrix :: get_pointer() const{
 return matr;
 };
 

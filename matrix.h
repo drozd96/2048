@@ -128,10 +128,11 @@ ostream & operator << (ostream & s, const Matrix & m){
 return s;
 };
 
-#endif
 istream & operator >> (istream & s, const Matrix & m){
 	for(int i = 0; i < m.size; i++)
 		for(int j = 0; j < m.size; j++)
 			s >> m.matr[i][j];
 return s;
 };
+
+#endif

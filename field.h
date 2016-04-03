@@ -1,8 +1,6 @@
-using namespace std;
+#ifndef _field_h_
+#define _field_h_
 
-#include <iostream>
-#include <ctime>
-#include <cstdlib>
 #include "matrix.h"
 
 #define pos 0
@@ -36,6 +34,8 @@ class Field : private Matrix{
 
 			Field & left_compress();
 			Field & right_compress();
+			Field & up_compress();
+			Field & down_compress();
 
 			Field & merge(int to_i, int to_j, int from_i, int from_j);
 			Field & swap(int i1, int j1, int i2, int j2);
@@ -78,9 +78,10 @@ return Matrix :: get_size();
 };
 
 ostream & operator << (ostream & s, const Field & f){
+	s << setw(7);
 	for(int i = 0; i < f.get_size(); i++){
 		for(int j = 0; j < f.get_size(); j++)
-			s << (f.get_pointer())[i][j] << " ";
+			s << (f.get_pointer())[i][j] << setw(7);
 		s << endl;	
 	} 
 return s;
@@ -100,12 +101,13 @@ void help(){
 }
 
 char touch_key(){
-	cout << "Press w,a,s,d to move or h to help" << endl;
+	cout << "Press w,a,s,d to move, h to help or e to exit" << endl;
 	char c;
 	do {
 		cin >> c;
-	} while(c != 'w' && c != 'a' && c != 's' && c != 'd' && c != 'h');
+	} while(c != 'w' && c != 'a' && c != 's' && c != 'd' && c != 'h' && c != 'e');
 	if(c == 'h'){ help(); c = touch_key(); }
+	if(c == 'e') exit(0);
 return c;	
 };
 
@@ -252,13 +254,66 @@ Field & Field :: right_compress(){
 return * this;
 };
 
+Field & Field :: up_compress(){
+	for(int i = 0; i < this -> get_size(); i++){
+		if(this -> IsColumn_down(i) == 0){
+			if(this -> NullColumn(i) == this -> get_size() - 1){
+				for(int j = 0; j < this -> get_size(); j++)				
+					if((this -> get_pointer())[j][i] != 0) this -> swap(0, i, j, i);
+			} else if(this -> NullColumn(i) == 1){
+				for(int j = 0; j < this -> get_size() - 1; j++)				
+					if((this -> get_pointer())[j][i] == 0) this -> swap(j, i, j + 1, i);
+			} else {
+				for(int k = 0; k < 2; k++){
+					for(int j = 0; j < this -> get_size() - 1; j++)				
+						if((this -> get_pointer())[j][i] == 0) this -> swap(j, i, j + 1, i);
+				}
+			}				
+		}
+	}
+return * this;
+};
+
+Field & Field :: down_compress(){
+	for(int i = 0; i < this -> get_size(); i++){
+		if(this -> IsColumn_up(i) == 0){
+			if(this -> NullColumn(i) == this -> get_size() - 1){
+				for(int j = this -> get_size() - 1; j >= 0; j--)				
+					if((this -> get_pointer())[j][i] != 0) this -> swap(this -> get_size() - 1, i, j, i);
+			} else if(this -> NullColumn(i) == 1){
+				for(int j = this -> get_size() - 1; j > 0; j--)				
+					if((this -> get_pointer())[j][i] == 0) this -> swap(j - 1, i, j, i);
+			} else {
+				for(int k = 0; k < 2; k++){
+					for(int j = this -> get_size() - 1; j > 0; j--)				
+						if((this -> get_pointer())[j][i] == 0) this -> swap(j - 1, i, j, i);
+				}
+			}				
+		}
+	}	
+return * this;
+};
+
 Field & Field :: up(){
-	
+	this -> up_compress();	
+
+	for(int i = 0; i < this -> get_size(); i++)
+		for(int j = 0; j < this -> get_size(); j++)
+			if(j != this -> get_size() - 1)					
+				if(this -> compare(j, i, j + 1, i) == 1) this -> merge(j, i, j + 1, i);
+
+	this -> up_compress();	
 return * this;
 };
 
 Field & Field :: down(){
+	this -> down_compress();	
 
+	for(int i = 0; i < this -> get_size(); i++)
+		for(int j = this -> get_size() - 1; j > 0; j--)				
+			if(this -> compare(j, i, j - 1, i) == 1) this -> merge(j, i, j - 1, i);
+
+	this -> down_compress();
 return * this;
 };
 
@@ -297,14 +352,4 @@ Field & Field :: move(){
 return * this;
 };
 
-int main(){
-	srand(time(NULL));
-	Field f(4);
-	f.new_game();
-	for(int i = 0; i < 6; i++)
-		f.continue_game();
-	cout << f;
-	f.move();
-	cout << f;
-return 0;
-}
+#endif
