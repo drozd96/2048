@@ -26,8 +26,21 @@ class Field : private Matrix{
 			Field & new_game();
 			bool IsEmpty_place();
 			Field & continue_game();
+			Field & move();
 			void end_game();
-			~Field(){};			
+
+			Field & up();	
+			Field & down();
+			Field & left();
+			Field & right();
+
+			Field & merge(int to_i, int to_j, int from_i, int from_j);
+			bool compare(int i1, int j1, int i2, int j2);
+
+			~Field(){};	
+
+			friend char touch_key();
+			friend void help();		
 }; 
 
 Field & Field :: operator = (const Field & f){ 
@@ -71,6 +84,21 @@ return s;
 
 //-------------------------------------------------------------------------------------
 
+void help(){
+	cout << "There will be an information about the game" << endl;
+}
+
+char touch_key(){
+	cout << "Press w,a,s,d to move or h to help" << endl;
+	char c;
+	do {
+		cin >> c;
+	} while(c != 'w' && c != 'a' && c != 's' && c != 'd' && c != 'h');
+	if(c == 'h'){ help(); c = touch_key(); }
+return c;	
+};
+
+
 int Field :: gen_position(){
 return (pos + rand() % this -> get_size());
 };
@@ -113,11 +141,66 @@ Field & Field :: continue_game(){
 return * this;	
 }; 
 
+Field & Field :: merge(int to_i, int to_j, int from_i, int from_j){
+	(this -> get_pointer())[to_i][to_j] *= 2;
+	(this -> get_pointer())[from_i][from_j] = 0;
+return * this;
+};
+
+bool Field :: compare(int i1, int j1, int i2, int j2){
+	if((this -> get_pointer())[i1][j1] == (this -> get_pointer())[i2][j2]) return 1;
+return 0;
+};
+
+Field & Field :: up(){
+	
+return * this;
+};
+
+Field & Field :: down(){
+
+return * this;
+};
+
+Field & Field :: left(){
+	cout << "left" << endl;
+
+	for(int i = 0; i < this -> get_size(); i++)
+		for(int j = 0; j < this -> get_size(); j++)
+			
+	
+	for(int i = 0; i < this -> get_size(); i++)
+		for(int j = 0; j < this -> get_size(); j++)
+			if(j != this -> get_size() - 1)					
+				if(this -> compare(i, j, i, j + 1) == 1) this -> merge(i, j, i, j + 1);
+return * this;
+};
+
+Field & Field :: right(){
+
+return * this;
+};
+
+Field & Field :: move(){
+	char way = touch_key();
+	switch(way){
+		case 'w': this -> up();    break;	
+		case 'a': this -> left();  break;
+		case 's': this -> down();  break;
+		case 'd': this -> right(); break;
+		default: cout << "There is some problem" << endl; exit(0); break;
+	}
+return * this;
+};
+
 int main(){
 	srand(time(NULL));
 	Field f(4);
 	f.new_game();
-	f.continue_game();
+	for(int i = 0; i < 6; i++)
+		f.continue_game();
+	cout << f;
+	f.move();
 	cout << f;
 return 0;
 }
