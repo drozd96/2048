@@ -34,9 +34,20 @@ class Field : private Matrix{
 			Field & left();
 			Field & right();
 
-			Field & merge(int to_i, int to_j, int from_i, int from_j);
-			bool compare(int i1, int j1, int i2, int j2);
+			Field & left_compress();
+			Field & right_compress();
 
+			Field & merge(int to_i, int to_j, int from_i, int from_j);
+			Field & swap(int i1, int j1, int i2, int j2);
+			bool compare(int i1, int j1, int i2, int j2);
+	
+			bool IsRow_down(int i);
+			bool IsRow_up(int i);
+			bool IsColumn_down(int j);
+			bool IsColumn_up(int j);
+			
+			int NullRow(int i);
+			int NullColumn(int j);
 			~Field(){};	
 
 			friend char touch_key();
@@ -147,9 +158,98 @@ Field & Field :: merge(int to_i, int to_j, int from_i, int from_j){
 return * this;
 };
 
+Field & Field :: swap(int i1, int j1, int i2, int j2){
+	(this -> get_pointer())[i1][j1] += (this -> get_pointer())[i2][j2];
+	(this -> get_pointer())[i2][j2] = (this -> get_pointer())[i1][j1] - (this -> get_pointer())[i2][j2];
+	(this -> get_pointer())[i1][j1] -= (this -> get_pointer())[i2][j2];	
+return * this;
+};
+
 bool Field :: compare(int i1, int j1, int i2, int j2){
 	if((this -> get_pointer())[i1][j1] == (this -> get_pointer())[i2][j2]) return 1;
 return 0;
+};
+
+int Field :: NullRow(int i){
+	int count = 0;
+	for(int j = 0; j < this -> get_size(); j++)
+		if((this -> get_pointer())[i][j] == 0) count++;
+return count;
+};
+
+int Field :: NullColumn(int j){
+	int count = 0;
+	for(int i = 0; i < this -> get_size(); i++)
+		if((this -> get_pointer())[i][j] == 0) count++;
+return count;
+};
+
+bool Field :: IsRow_down(int i){
+	for(int j = 0; j < this -> get_size(); j++)
+		if(j != this -> get_size() - 1)	
+			if( ((this -> get_pointer())[i][j] == 0) && ((this -> get_pointer())[i][j + 1] != 0) ) return 0;
+return 1;
+};
+
+bool Field :: IsRow_up(int i){
+	for(int j = 0; j < this -> get_size(); j++)
+		if(j != this -> get_size() - 1)	
+			if( ((this -> get_pointer())[i][j] != 0) && ((this -> get_pointer())[i][j + 1] == 0) ) return 0;
+return 1;
+};
+
+bool Field :: IsColumn_up(int j){
+	for(int i = 0; i < this -> get_size(); i++)
+		if(i != this -> get_size() - 1)	
+			if( ((this -> get_pointer())[i][j] != 0) && ((this -> get_pointer())[i + 1][j] == 0) ) return 0;
+return 1;
+};
+
+bool Field :: IsColumn_down(int j){
+	for(int i = 0; i < this -> get_size(); i++)
+		if(i != this -> get_size() - 1)	
+			if( ((this -> get_pointer())[i][j] == 0) && ((this -> get_pointer())[i + 1][j] != 0) ) return 0;
+return 1;
+};
+
+Field & Field :: left_compress(){
+	for(int i = 0; i < this -> get_size(); i++){
+		if(this -> IsRow_down(i) == 0){
+			if(this -> NullRow(i) == this -> get_size() - 1){
+				for(int j = 0; j < this -> get_size(); j++)				
+					if((this -> get_pointer())[i][j] != 0) this -> swap(i, 0, i, j);
+			} else if(this -> NullRow(i) == 1){
+				for(int j = 0; j < this -> get_size(); j++)				
+					if((this -> get_pointer())[i][j] == 0) this -> swap(i, j, i, j + 1);
+			} else {
+				for(int k = 0; k < 2; k++){
+					for(int j = 0; j < this -> get_size(); j++)				
+						if((this -> get_pointer())[i][j] == 0) this -> swap(i, j, i, j + 1);
+				}
+			}				
+		}
+	}
+return * this;
+};
+
+Field & Field :: right_compress(){
+	for(int i = 0; i < this -> get_size(); i++){
+		if(this -> IsRow_up(i) == 0){
+			if(this -> NullRow(i) == this -> get_size() - 1){
+				for(int j = this -> get_size() - 1; j >= 0; j--)				
+					if((this -> get_pointer())[i][j] != 0) this -> swap(i, this -> get_size() - 1, i, j);
+			} else if(this -> NullRow(i) == 1){
+				for(int j = this -> get_size() - 1; j >= 0; j--)				
+					if((this -> get_pointer())[i][j] == 0) this -> swap(i, j - 1, i, j);
+			} else {
+				for(int k = 0; k < 2; k++){
+					for(int j = this -> get_size() - 1; j >= 0; j--)				
+						if((this -> get_pointer())[i][j] == 0) this -> swap(i, j - 1, i, j);
+				}
+			}				
+		}
+	}
+return * this;
 };
 
 Field & Field :: up(){
@@ -163,21 +263,25 @@ return * this;
 };
 
 Field & Field :: left(){
-	cout << "left" << endl;
+	this -> left_compress();	
 
-	for(int i = 0; i < this -> get_size(); i++)
-		for(int j = 0; j < this -> get_size(); j++)
-			
-	
 	for(int i = 0; i < this -> get_size(); i++)
 		for(int j = 0; j < this -> get_size(); j++)
 			if(j != this -> get_size() - 1)					
 				if(this -> compare(i, j, i, j + 1) == 1) this -> merge(i, j, i, j + 1);
+
+	this -> left_compress();
 return * this;
 };
 
 Field & Field :: right(){
+	this -> right_compress();	
 
+	for(int i = 0; i < this -> get_size(); i++)
+		for(int j = this -> get_size() - 1; j > 0; j--)					
+			if(this -> compare(i, j - 1, i, j) == 1) this -> merge(i, j, i, j - 1);
+
+	this -> right_compress();
 return * this;
 };
 
